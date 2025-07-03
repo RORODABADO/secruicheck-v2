@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScanForm } from "@/components/ScanForm";
 import { ScanResults } from "@/components/ScanResults";
-import { ScanHistory } from "@/components/ScanHistory";
 import { Shield, Zap, AlertTriangle } from "lucide-react";
 
 const Index = () => {
@@ -65,10 +64,9 @@ const Index = () => {
 
         {/* Main Interface */}
         <Tabs defaultValue="scan" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="scan">Nouveau Scan</TabsTrigger>
             <TabsTrigger value="results">Résultats</TabsTrigger>
-            <TabsTrigger value="history">Historique</TabsTrigger>
           </TabsList>
 
           <TabsContent value="scan">
@@ -87,10 +85,6 @@ const Index = () => {
 
           <TabsContent value="results">
             <ScanResults />
-          </TabsContent>
-
-          <TabsContent value="history">
-            <ScanHistory />
           </TabsContent>
         </Tabs>
       </main>

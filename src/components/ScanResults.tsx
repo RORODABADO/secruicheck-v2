@@ -1,9 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertTriangle, CheckCircle, XCircle, Download, Eye, BookOpen, Shield, Lightbulb } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle, BookOpen, Shield, Lightbulb } from "lucide-react";
+import { PdfExport } from "./PdfExport";
 
 // Données pédagogiques pour les étudiants
 const mockVulnerabilities = [
@@ -130,10 +128,10 @@ export const ScanResults = () => {
             <div>
               <h4 className="font-semibold mb-2">Prochaines Étapes :</h4>
               <ul className="space-y-1">
-                <li>• Cliquez sur "Détails" pour comprendre chaque vulnérabilité</li>
+                <li>• Téléchargez le rapport PDF complet ci-dessous</li>
                 <li>• Priorisez les corrections par niveau de sévérité</li>
                 <li>• Testez vos corrections avec un nouveau scan</li>
-                <li>• Documentez vos corrections pour l'équipe</li>
+                <li>• Partagez le rapport avec votre équipe</li>
               </ul>
             </div>
           </div>
@@ -195,16 +193,12 @@ export const ScanResults = () => {
         </Card>
       </div>
 
-      {/* Actions */}
-      <div className="flex space-x-4">
-        <Button variant="outline" className="flex items-center space-x-2">
-          <Download className="h-4 w-4" />
-          <span>Rapport PDF</span>
-        </Button>
-        <Button variant="outline" className="flex items-center space-x-2">
-          <Download className="h-4 w-4" />
-          <span>Export Développeur</span>
-        </Button>
+      {/* Export PDF */}
+      <div className="flex justify-center">
+        <PdfExport 
+          vulnerabilities={mockVulnerabilities} 
+          targetUrl="https://example.com" 
+        />
       </div>
 
       {/* Tableau des Vulnérabilités Détaillées */}

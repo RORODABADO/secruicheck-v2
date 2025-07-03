@@ -1,12 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Play, Square, Globe, BookOpen } from "lucide-react";
+import { Play, Square, Globe, BookOpen, Clock, Shield } from "lucide-react";
 import { ZAP_CONFIG } from "@/config/zapConfig";
 
 export const ScanForm = () => {
@@ -14,13 +15,34 @@ export const ScanForm = () => {
   const [scanType, setScanType] = useState("passive");
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
+  const [hasPermission, setHasPermission] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
   const { toast } = useToast();
+
+  // Calcul du temps restant
+  useEffect(() => {
+    if (isScanning && scanProgress < 100) {
+      const scanConfig = ZAP_CONFIG.scanConfig.scanTypes[scanType as keyof typeof ZAP_CONFIG.scanConfig.scanTypes];
+      const totalTime = scanConfig.name === "Scan Passif" ? 4 : scanConfig.name === "Scan Actif" ? 20 : 30; // en minutes
+      const remaining = Math.max(0, totalTime - (totalTime * scanProgress / 100));
+      setTimeRemaining(Math.ceil(remaining));
+    }
+  }, [scanProgress, scanType, isScanning]);
 
   const handleStartScan = async () => {
     if (!targetUrl) {
       toast({
         title: "Erreur",
         description: "Veuillez saisir une URL cible",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!hasPermission) {
+      toast({
+        title: "Autorisation requise",
+        description: "Vous devez confirmer avoir le droit de scanner ce site web",
         variant: "destructive",
       });
       return;
@@ -46,7 +68,7 @@ export const ScanForm = () => {
       
       toast({
         title: "Scan démarré",
-        description: `${selectedScanType.name} de ${targetUrl} en cours... (${selectedScanType.duration})`,
+        description: `${selectedScanType.name} de ${targetUrl} en cours...`,
       });
 
       // Simulation de progression réaliste
@@ -55,15 +77,16 @@ export const ScanForm = () => {
           if (prev >= 100) {
             clearInterval(progressInterval);
             setIsScanning(false);
+            setTimeRemaining(0);
             toast({
               title: "Scan terminé",
               description: "L'analyse de sécurité est terminée. Consultez l'onglet Résultats.",
             });
             return 100;
           }
-          return prev + Math.random() * 15; // Progression plus réaliste
+          return prev + Math.random() * 8 + 2; // Progression plus réaliste
         });
-      }, 800);
+      }, 1000);
 
     } catch (error) {
       toast({
@@ -78,6 +101,7 @@ export const ScanForm = () => {
   const handleStopScan = () => {
     setIsScanning(false);
     setScanProgress(0);
+    setTimeRemaining(0);
     toast({
       title: "Scan arrêté",
       description: "Le scan a été interrompu par l'utilisateur",
@@ -119,9 +143,6 @@ export const ScanForm = () => {
             placeholder="https://votre-site-test.com"
             disabled={isScanning}
           />
-          <p className="text-sm text-muted-foreground mt-1">
-            Testez uniquement des sites que vous possédez ou pour lesquels vous avez l'autorisation
-          </p>
         </div>
 
         <div>
@@ -153,12 +174,30 @@ export const ScanForm = () => {
             </p>
           </div>
         </div>
+
+        {/* Checkbox de permission */}
+        <div className="flex items-center space-x-2 p-4 border rounded-md bg-yellow-50 border-yellow-200">
+          <Checkbox 
+            id="permission" 
+            checked={hasPermission}
+            onCheckedChange={setHasPermission}
+            disabled={isScanning}
+          />
+          <Label htmlFor="permission" className="text-sm flex items-center space-x-2">
+            <Shield className="h-4 w-4 text-yellow-600" />
+            <span>J'ai le droit de scanner ce site web et j'assume la responsabilité de ce test</span>
+          </Label>
+        </div>
       </div>
 
       {/* Contrôles du Scan */}
       <div className="flex space-x-4">
         {!isScanning ? (
-          <Button onClick={handleStartScan} className="flex items-center space-x-2">
+          <Button 
+            onClick={handleStartScan} 
+            disabled={!hasPermission}
+            className="flex items-center space-x-2"
+          >
             <Play className="h-4 w-4" />
             <span>Démarrer le Scan</span>
           </Button>
@@ -174,7 +213,13 @@ export const ScanForm = () => {
       {isScanning && (
         <Card>
           <CardHeader>
-            <CardTitle>Scan en cours...</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              <span>Scan en cours...</span>
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>~{timeRemaining} min restantes</span>
+              </div>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
