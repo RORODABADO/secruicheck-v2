@@ -180,7 +180,7 @@ export const ScanForm = () => {
           <Checkbox 
             id="permission" 
             checked={hasPermission}
-            onCheckedChange={setHasPermission}
+            onCheckedChange={(checked) => setHasPermission(checked === true)}
             disabled={isScanning}
           />
           <Label htmlFor="permission" className="text-sm flex items-center space-x-2">
